@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pleated Skirt Calculator</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background:#ffffff;
+    margin:0;
+    padding:20px;
+    color:#111827;
+}
+.container{
+    max-width:950px;
+    margin:auto;
+}
+h1{
+    text-align:center;
+    font-size:26px;
+    margin-bottom:20px;
+}
+.card{
+    background:#f8fafc;
+    padding:15px;
+    border-radius:14px;
+    margin-bottom:15px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.05);
+}
+label{
+    font-weight:600;
+    margin-top:10px;
+    display:block;
+}
+input, select{
+    width:100%;
+    padding:10px;
+    margin-top:5px;
+    border:1px solid #e5e7eb;
+    border-radius:10px;
+}
+.row{
+    display:flex;
+    gap:10px;
+}
+.row > div{flex:1;}
+
+button{
+    width:100%;
+    padding:12px;
+    border:none;
+    border-radius:10px;
+    background:#2563eb;
+    color:white;
+    cursor:pointer;
+    margin-top:10px;
+}
+button:hover{background:#1d4ed8;}
+
+.secondary{
+    background:#10b981;
+}
+.secondary:hover{
+    background:#059669;
+}
+
+.danger{
+    background:#ef4444;
+}
+.danger:hover{
+    background:#dc2626;
+}
+
+.result{
+    background:#ecfdf5;
+    padding:12px;
+    border-radius:10px;
+    margin-top:10px;
+    font-size:14px;
+    line-height:1.6;
+}
+
+small{color:#6b7280;}
+
+canvas{
+    width:100%;
+    background:#fff;
+    border:1px dashed #e5e7eb;
+    border-radius:10px;
+    margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>Pleated Skirt Calculator V2</h1>
+
+<div class="card">
+<h3>Measurements</h3>
+
+<div class="row">
+<div>
+<label>Waist</label>
+<input type="number" id="waist">
+</div>
+<div>
+<label>Unit</label>
+<select id="unit">
+<option value="cm">cm</option>
+<option value="in">inch</option>
+<option value="ft">ft</option>
+<option value="m">meter</option>
+</select>
+</div>
+</div>
+
+<label>Skirt Length</label>
+<input type="number" id="length">
+
+<div class="row">
+<div>
+<label>Pleat Type</label>
+<select id="pleatType">
+<option value="knife">Knife Pleat</option>
+<option value="box">Box Pleat</option>
+<option value="invert">Inverted Box Pleat</option>
+</select>
+</div>
+<div>
+<label>Fabric Width (cm)</label>
+<input type="number" id="fabricWidth" value="150">
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>Pleat Width (cm)</label>
+<input type="number" id="pleatWidth" value="5">
+</div>
+<div>
+<label>Number of Pleats</label>
+<input type="number" id="pleats" value="10">
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>Seam Allowance (cm)</label>
+<input type="number" id="seam" value="2">
+</div>
+<div>
+<label>Hem Allowance (cm)</label>
+<input type="number" id="hem" value="4">
+</div>
+</div>
+
+<div class="row">
+<div>
+<label>Wastage %</label>
+<input type="number" id="wastage" value="10">
+</div>
+<div>
+<label>Price per meter</label>
+<input type="number" id="price" value="0">
+</div>
+</div>
+
+<button onclick="calculate()">Calculate</button>
+<button class="secondary" onclick="save()">Save</button>
+<button class="danger" onclick="resetAll()">Reset</button>
+</div>
+
+<div class="card">
+<h3>Visual Preview</h3>
+<canvas id="canvas" height="160"></canvas>
+</div>
+
+<div class="card">
+<h3>Results</h3>
+<div class="result" id="output">Enter values and calculate</div>
+</div>
+
+</div>
+
+<script>
+function convert(value, unit){
+    if(unit==="cm") return value;
+    if(unit==="in") return value*2.54;
+    if(unit==="ft") return value*30.48;
+    if(unit==="m") return value*100;
+    return value;
+}
+
+function calculate(){
+    let waist = convert(parseFloat(document.getElementById("waist").value||0),
+                        document.getElementById("unit").value);
+    let length = parseFloat(document.getElementById("length").value||0);
+    let pleatWidth = parseFloat(document.getElementById("pleatWidth").value||0);
+    let pleats = parseInt(document.getElementById("pleats").value||0);
+    let seam = parseFloat(document.getElementById("seam").value||0);
+    let hem = parseFloat(document.getElementById("hem").value||0);
+    let wastage = parseFloat(document.getElementById("wastage").value||0);
+    let price = parseFloat(document.getElementById("price").value||0);
+    let fabricWidth = parseFloat(document.getElementById("fabricWidth").value||150);
+
+    let baseFabricWidth = (pleatWidth * pleats * 2) + waist + seam;
+
+    let fabricLength = length + seam + hem;
+
+    let totalFabric = (fabricLength * (baseFabricWidth / fabricWidth)) / 100;
+
+    let totalWithWastage = totalFabric + (totalFabric * wastage / 100);
+
+    let cost = totalWithWastage * price;
+
+    document.getElementById("output").innerHTML = `
+    <b>Waist (cm):</b> ${waist.toFixed(2)}<br>
+    <b>Fabric Width Needed:</b> ${baseFabricWidth.toFixed(2)} cm<br>
+    <b>Fabric Length:</b> ${fabricLength.toFixed(2)} cm<br>
+    <b>Total Fabric:</b> ${totalWithWastage.toFixed(2)} meters<br>
+    <b>Estimated Cost:</b> ${cost.toFixed(2)}<br>
+    <b>Wastage Applied:</b> ${wastage}%<br>
+    `;
+    
+    drawPreview(pleats);
+}
+
+function drawPreview(pleats){
+    let c = document.getElementById("canvas");
+    let ctx = c.getContext("2d");
+    ctx.clearRect(0,0,c.width,c.height);
+
+    let spacing = c.width / (pleats+1);
+
+    for(let i=0;i<pleats;i++){
+        ctx.beginPath();
+        ctx.moveTo(spacing*(i+1),20);
+        ctx.lineTo(spacing*(i+1),140);
+        ctx.strokeStyle="#2563eb";
+        ctx.stroke();
+    }
+}
+
+function save(){
+    localStorage.setItem("skirtData", JSON.stringify({
+        waist: document.getElementById("waist").value,
+        length: document.getElementById("length").value,
+        pleatWidth: document.getElementById("pleatWidth").value,
+        pleats: document.getElementById("pleats").value
+    }));
+    alert("Saved!");
+}
+
+function resetAll(){
+    document.querySelectorAll("input").forEach(i=>i.value="");
+    document.getElementById("output").innerHTML="Reset done";
+}
+</script>
+
+</body>
+</html>
